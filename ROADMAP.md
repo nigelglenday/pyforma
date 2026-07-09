@@ -2,32 +2,38 @@
 
 ## Verified against the source
 
-The loans corkscrew was checked line-by-line against year 1 and year 2 of the
-source `model` tab (BOP 1350 -> EOP 1466.5 -> EOP 1558.5, interest income
-$77.45 -> $83.19). Matches exactly. Everything downstream of loans
-(securities, funding, income statement, balance sheet) is a fresh build using
-the same pattern vocabulary, not a line-by-line port.
+**The operating core ties exactly.** Every line of the income statement and
+balance sheet matches the source `model` tab across all 10 years, to floating
+point noise (worst absolute difference 4.5e-13). Year 1 net income $20.5961,
+borrowings $234.3657, common equity $168.3875, all identical to the workbook.
+
+Reproduce with the tie-out check in `tests/`, or against
+`reference/Standard Operating Model v2.xlsx` directly.
+
+Three things the earlier port got structurally wrong, now fixed:
+
+- **Borrowings are the plug, not cash.** Cash is a modeled line growing at the
+  other-asset rate. The port had inverted this, making cash the residual, which
+  produced a cash balance ballooning to a quarter of assets and an entirely
+  artificial earnings rollover.
+- **Securities are not circular.** They are a target percent of total assets,
+  solved in closed form: `S = A * p / (1 - p)`. No convergence loop needed.
+- **Fee income is grossed up** to a share of total revenue, not multiplied
+  against net interest income.
 
 ## Deliberate simplifications (read before extending)
 
-This was built in a ~60-minute timebox. What's real vs. approximated:
-
-1. **Loans**: real port, verified against source formulas. Aggregate rollforward
-   only. The source model's vintage-level cohort matrix (`loan` tab, each
-   origination year amortizing on its own schedule) was **not** ported. If you
-   want vintage-level detail back, that's the next real piece of work.
-2. **Securities**: sized as a flat % of the loan book, not as a target % of
-   total assets. The source model's version creates a circular reference
-   (securities sizing depends on total assets, which includes securities).
-   Sidestepped rather than solved. Revisit with a convergence loop if the
-   distinction matters for your use.
-3. **Cash is a balancing plug**, not modeled from a cash flow statement. This
-   guarantees the balance sheet balances but means cash isn't really "modeled."
-   It's solved for. Fine for illustrative purposes, not fine if you need to
-   reason about actual liquidity.
-4. **No loan loss reserve line**: net charge-offs flow straight through as
-   the provision expense, with no separate reserve build/release rollforward.
-5. **No M&A / target acquisition / pro forma / IRR-MOIC layer.** The source
+1. **Loans**: aggregate rollforward only. The source model's vintage-level
+   cohort matrix (`loan` tab, each origination year amortizing on its own
+   schedule) was **not** ported. If you want vintage-level detail back, that's
+   the next real piece of work.
+2. **Borrowings go negative from 2021.** Deposits compound at 5% while assets
+   grow more slowly, so the plug flips to excess funding (-$279 by 2022). This
+   is faithful to the source, which does the same thing. It is still not a
+   balance sheet any real bank runs. Fixing it means giving the model a
+   deployment policy (cap the excess, then buy securities or return capital)
+   rather than letting a single plug absorb the mismatch.
+3. **No M&A / target acquisition / pro forma / IRR-MOIC layer.** The source
    model's second half (rows ~200-408: transaction assumptions, acquired P&L,
    pro forma combination, investor returns, sensitivity table, Gordon Growth
    valuation) was not touched. This port covers only the standalone operating

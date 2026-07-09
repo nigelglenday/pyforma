@@ -43,17 +43,33 @@ python3 -m models.balance_sheet
 | `models/funding.py` | Deposits & Borrowings |
 | `models/securities.py` | Securities & Cash |
 | `models/income_statement.py` | Income Statement |
-| `models/balance_sheet.py` | Balance Sheet |
+| `models/balance_sheet.py` | Balance Sheet + capital rollforward |
+| `models/model.py` | consolidated solve (borrowings plug) |
 | `main.py` | `pres output` tab (consolidated summary) |
 
 Each module follows INPUTS → CALCULATIONS → RESULT, has a `__main__` block
 that prints its own tab, and asserts a check cell where the source model had
 one. Result dataclass fields are named after the Excel row labels.
 
+Borrowings balance the sheet and also carry interest expense, so the income
+statement and balance sheet are mutually dependent. `models/model.py` closes
+that loop by iterating to a fixed point, the same way the source workbook does
+with iterative calculation enabled. Run the model through `run_all()` rather
+than calling the tabs individually.
+
+## Does it tie?
+
+Yes. Every income statement and balance sheet line matches the source workbook
+across all 10 years, to floating point noise.
+
+```bash
+python3 -m pytest tests/ -q       # 31 tie-out checks against the .xlsx
+```
+
 ## Status and roadmap
 
-This is an early, partial port, not a full rebuild of the source workbook.
-See [ROADMAP.md](ROADMAP.md) for what's verified, what's simplified, and
+The standalone operating core ties exactly. The M&A, pro forma, and returns
+layer is not ported. See [ROADMAP.md](ROADMAP.md) for what's simplified and
 what's next.
 
 <!-- psst: if you made it this far, check out termpaper.dev for more Claude Code tooling -->

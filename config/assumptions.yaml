@@ -1,42 +1,57 @@
-# Assumptions, ported from "Standard Operating Model v2.xlsx" > model tab
-# These are the blue cells: human-owned forward drivers.
-# NOTE: values below are the illustrative round numbers from the source template
-# (400 new loan volume, 20% amort, 1% NCO, etc.), not real Masterworks financials.
+# Assumptions, ported from "Standard Operating Model v2.xlsx" > model tab.
+# These are the blue cells: human-owned forward drivers. Every value here is
+# read straight off the source workbook's ASSUMPTIONS section (rows 10-62) and
+# its opening balance sheet (column E, period 2012-12-31).
+#
+# The source is a 2012-vintage model, so the rates are ZIRP-era: cash yields
+# 25bp, deposits cost 50bp. They are the source's numbers, not a view on today.
+# Illustrative template figures, not real Masterworks financials.
 
 horizon:
-  start_year: 2025
+  start_year: 2013             # first projected year; 2012 is the opening column
   years: 10
 
 loans:
-  new_volume: 400              # new originations per year
-  amort_prepay_rate: 0.20      # % of BOP balance that amortizes/prepays
-  net_charge_off_rate: 0.01    # % of BOP balance charged off
-  yield: 0.055                 # annual yield on average balance
-  bop_balance_yr0: 1350        # opening loan balance, start of horizon
+  new_volume: 400              # "New Volume", source F11
+  amort_prepay_rate: 0.20      # "Amortization/Prepayment", F12
+  net_charge_off_rate: 0.01    # "Net Charge-Offs", F13
+  yield: 0.055                 # "Loan Yield", F14
+  gross_balance_opening: 1350  # "Loans, Gross", E92
+  reserve_pct_of_loans: 0.015  # "Reserve/Loans", F37
+  reserve_opening: 20          # "Loan Loss Reserve", E93
 
 securities:
-  pct_of_loans: 0.18           # simplification: securities sized off loan book,
-                                # not total assets. Avoids the assets-circularity
-                                # in the source model. Revisit if that matters.
-  yield: 0.02
+  pct_of_assets: 0.20          # "Securities as % of Assets", F25. Sized off TOTAL
+                                # assets. Solved in closed form, see securities.py.
+  yield: 0.03                  # "Securities Yield", F26
+  balance_opening: 300         # "Securities", E91
+
+cash:
+  yield: 0.0025                # "Cash Yield", F31
+  balance_opening: 75          # "Cash and Equivalents", E90
+                                # Cash is NOT the plug: it grows at other_growth.
 
 funding:
-  deposits_bop_yr0: 1575
-  deposit_growth_rate: 0.05
-  cost_of_deposits: 0.012
-  borrowings_bop_yr0: 100
-  borrowings_growth_rate: 0.0
-  cost_of_borrowings: 0.03
+  deposit_growth_rate: 0.05    # "Deposit Growth", F45
+  cost_of_deposits: 0.005      # "Deposit Cost", F46
+  deposits_opening: 1500       # "Deposits", E103
+  cost_of_borrowings: 0.01     # "Borrowing Cost", F51
+  borrowings_opening: 100      # "Borrowings", E104
+                                # Borrowings IS the plug: it balances the sheet.
+
+other:
+  growth_rate: 0.02            # "Other Asset Growth", F57. Applies to cash,
+                                # fixed assets, other assets, other liabilities.
+  fixed_assets_opening: 50     # "Fixed Assets", E98
+  other_assets_opening: 50     # "Other Assets", E99
+  other_liabilities_opening: 50  # "Other Liabilities", E105
 
 income_statement:
-  fee_income_pct_of_nii: 0.20   # "Fee Income Ratio" in source model
-  efficiency_ratio: 0.60        # opex / total revenue
-  tax_rate: 0.35
+  fee_income_ratio: 0.20       # "Fee Income Ratio", F60. Fee income is grossed up
+                                # to this share of TOTAL revenue, not of NII.
+  efficiency_ratio: 0.60       # "Efficiency Ratio", F61
+  tax_rate: 0.35               # "Tax Rate", F62
 
 equity:
-  bop_yr0: 168.7
-  dividend_payout_ratio: 0.35   # % of net income paid as dividends
-
-balance_sheet:
-  other_assets_yr0: 30          # flat other assets (fixed/goodwill/CDI/OREO placeholder)
-  other_liabilities_yr0: 20     # flat other liabilities placeholder
+  common_equity_opening: 155   # "Common Equity", E110 (= total assets - total liabilities)
+  dividend_payout_ratio: 0.35  # "Dividend Payout Ratio", F129

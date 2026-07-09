@@ -40,6 +40,14 @@ def flat(value: float, index: pd.DatetimeIndex) -> pd.Series:
     return pd.Series(value, index=index)
 
 
+def prepend_opening(eop: pd.Series, opening: float) -> pd.Series:
+    """Opening balances for a closing-balance series: each period opens where the
+    prior closed, and the first period opens at the model's opening balance."""
+    bop = eop.shift(1)
+    bop.iloc[0] = float(opening)
+    return bop
+
+
 def average_balance(bop: pd.Series, eop: pd.Series) -> pd.Series:
     return (bop + eop) / 2
 

@@ -6,11 +6,7 @@ Usage: python3 main.py
 import pandas as pd
 import yaml
 
-from models.loans import run as run_loans
-from models.securities import run as run_securities
-from models.funding import run as run_funding
-from models.income_statement import run as run_income_statement
-from models.balance_sheet import run as run_balance_sheet
+from models.model import run_all
 
 CONFIG_PATH = "config/assumptions.yaml"
 
@@ -19,31 +15,31 @@ def main():
     with open(CONFIG_PATH) as f:
         assumptions = yaml.safe_load(f)
 
-    loans = run_loans(assumptions)
-    securities = run_securities(assumptions)
-    funding = run_funding(assumptions)
-    income = run_income_statement(assumptions)
-    balance_sheet = run_balance_sheet(assumptions)
-
-    nim = income.net_interest_income / loans.average_balance
+    result = run_all(assumptions)
+    income = result.income
+    balance_sheet = result.balance_sheet
 
     summary = pd.DataFrame({
-        "Cash and Equivalents": balance_sheet.cash_plug,
+        "Cash and Equivalents": balance_sheet.cash,
+        "Securities": balance_sheet.securities,
         "Loans, Net": balance_sheet.loans_net,
         "Total Assets": balance_sheet.total_assets,
         "Deposits": balance_sheet.deposits,
+        "Borrowings": balance_sheet.borrowings,
         "Common Equity": balance_sheet.common_equity,
         "Net Income": income.net_income,
-        "Net Interest Margin (%)": nim * 100,
+        "Net Interest Margin (%)": result.net_interest_margin * 100,
     })
 
     print("\nSTANDARD OPERATING MODEL: Python port")
     print("=" * 100)
-    with pd.option_context("display.float_format", "${:,.1f}".format, "display.width", 160):
+    with pd.option_context("display.float_format", "{:,.1f}".format, "display.width", 160):
         print(summary.T)
     print()
-    print(f"Check: total assets - total liabilities - equity == 0 across all years: "
-          f"{((balance_sheet.total_assets - balance_sheet.total_liabilities - balance_sheet.common_equity).abs() < 0.01).all()}")
+    check = (balance_sheet.total_liabilities + balance_sheet.common_equity
+             - balance_sheet.total_assets).abs().max()
+    print(f"Check: liabilities + equity - assets == 0 across all years: {check < 1e-9} ({check:.2e})")
+    print(f"Borrowings plug converged in {result.iterations} passes.")
     print()
 
 
