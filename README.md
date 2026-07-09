@@ -1,4 +1,20 @@
-# finance-co-model
+```
+    ______  ____________  ____  __  ______
+   / __ \ \/ / ____/ __ \/ __ \/  |/  /   |
+  / /_/ /\  / /_  / / / / /_/ / /|_/ / /| |
+ / ____/ / / __/ / /_/ / _, _/ /  / / ___ |
+/_/     /_/_/    \____/_/ |_/_/  /_/_/  |_|
+```
+
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![pandas](https://img.shields.io/badge/pandas-%E2%9C%93-150458?logo=pandas&logoColor=white)](https://pandas.pydata.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-experimental-orange)]()
+
+A financial operating model, ported from Excel to Python and back to
+Excel again. Old-school bank modeling conventions (blue inputs, black
+formulas, check cells that must equal zero) rebuilt as a real calculation
+engine you can iterate on with plain English instead of formula-hunting.
 
 Python port of `reference/Standard Operating Model v2.xlsx`: a standard bank
 holding company operating model (loans, deposits, income statement, balance
