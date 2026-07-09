@@ -1,0 +1,42 @@
+# Assumptions, ported from "Standard Operating Model v2.xlsx" > model tab
+# These are the blue cells: human-owned forward drivers.
+# NOTE: values below are the illustrative round numbers from the source template
+# (400 new loan volume, 20% amort, 1% NCO, etc.), not real Masterworks financials.
+
+horizon:
+  start_year: 2025
+  years: 10
+
+loans:
+  new_volume: 400              # new originations per year
+  amort_prepay_rate: 0.20      # % of BOP balance that amortizes/prepays
+  net_charge_off_rate: 0.01    # % of BOP balance charged off
+  yield: 0.055                 # annual yield on average balance
+  bop_balance_yr0: 1350        # opening loan balance, start of horizon
+
+securities:
+  pct_of_loans: 0.18           # simplification: securities sized off loan book,
+                                # not total assets. Avoids the assets-circularity
+                                # in the source model. Revisit if that matters.
+  yield: 0.02
+
+funding:
+  deposits_bop_yr0: 1575
+  deposit_growth_rate: 0.05
+  cost_of_deposits: 0.012
+  borrowings_bop_yr0: 100
+  borrowings_growth_rate: 0.0
+  cost_of_borrowings: 0.03
+
+income_statement:
+  fee_income_pct_of_nii: 0.20   # "Fee Income Ratio" in source model
+  efficiency_ratio: 0.60        # opex / total revenue
+  tax_rate: 0.35
+
+equity:
+  bop_yr0: 168.7
+  dividend_payout_ratio: 0.35   # % of net income paid as dividends
+
+balance_sheet:
+  other_assets_yr0: 30          # flat other assets (fixed/goodwill/CDI/OREO placeholder)
+  other_liabilities_yr0: 20     # flat other liabilities placeholder

@@ -1,0 +1,96 @@
+# finance-co-model
+
+Python port of `reference/Standard Operating Model v2.xlsx`: a standard bank
+holding company operating model (loans, deposits, income statement, balance
+sheet, capital). Built as a direct, pragmatic port (no generic dependency-graph
+engine), following the module-per-tab conventions in Masterworks'
+`budget-redux` `MODELING_PATTERNS.md`, generalized.
+
+## Run it
+
+```bash
+python3 main.py                    # full consolidated summary
+python3 -m models.loans             # any single tab, standalone
+python3 -m models.funding
+python3 -m models.securities
+python3 -m models.income_statement
+python3 -m models.balance_sheet
+```
+
+## Structure
+
+| File | Excel tab equivalent |
+|---|---|
+| `config/assumptions.yaml` | ASSUMPTIONS section (blue cells) |
+| `models/patterns.py` | pattern vocabulary (corkscrew, growth, pct_of, flat) |
+| `models/loans.py` | Loans rollforward |
+| `models/funding.py` | Deposits & Borrowings |
+| `models/securities.py` | Securities & Cash |
+| `models/income_statement.py` | Income Statement |
+| `models/balance_sheet.py` | Balance Sheet |
+| `main.py` | `pres output` tab (consolidated summary) |
+
+Each module follows INPUTS → CALCULATIONS → RESULT, has a `__main__` block
+that prints its own tab, and asserts a check cell where the source model had
+one. Result dataclass fields are named after the Excel row labels.
+
+## Verified against the source
+
+The loans corkscrew was checked line-by-line against year 1 and year 2 of the
+source `model` tab (BOP 1350 → EOP 1466.5 → EOP 1558.5, interest income
+$77.45 → $83.19). Matches exactly. Everything downstream of loans
+(securities, funding, income statement, balance sheet) is a fresh build using
+the same pattern vocabulary, not a line-by-line port. See below.
+
+## Deliberate simplifications (read before extending)
+
+This was built in a ~60-minute timebox. What's real vs. approximated:
+
+1. **Loans**: real port, verified against source formulas. Aggregate rollforward
+   only. The source model's vintage-level cohort matrix (`loan` tab, each
+   origination year amortizing on its own schedule) was **not** ported. If you
+   want vintage-level detail back, that's the next real piece of work.
+2. **Securities**: sized as a flat % of the loan book, not as a target % of
+   total assets. The source model's version creates a circular reference
+   (securities sizing depends on total assets, which includes securities).
+   Sidestepped rather than solved. Revisit with a convergence loop if the
+   distinction matters for your use.
+3. **Cash is a balancing plug**, not modeled from a cash flow statement. This
+   guarantees the balance sheet balances but means cash isn't really "modeled."
+   It's solved for. Fine for illustrative purposes, not fine if you need to
+   reason about actual liquidity.
+4. **No loan loss reserve line**: net charge-offs flow straight through as
+   the provision expense, with no separate reserve build/release rollforward.
+5. **No M&A / target acquisition / pro forma / IRR-MOIC layer.** The source
+   model's second half (rows ~200-408: transaction assumptions, acquired P&L,
+   pro forma combination, investor returns, sensitivity table, Gordon Growth
+   valuation) was not touched. This port covers only the standalone operating
+   core.
+6. **Inputs are YAML, not an Excel input workbook.** This diverges from the
+   `MODELING_PATTERNS.md` standard, which specifies Excel-as-input (so a
+   human owns the number *and* the rationale next to it). YAML was faster to
+   ship in the time available. Revisit if you want the commentary-alongside-
+   number property, or if you want this project's inputs to be directly
+   editable by a non-technical user without touching a text file.
+7. **No Excel writer.** Output is a terminal table only. "Export back to the
+   same format" (the fourth thing from the original ask) is not built.
+
+## What's genuinely done
+
+- Full loans → securities → funding → income statement → balance sheet chain,
+  10-year horizon, runs end to end.
+- Balance sheet balances exactly (assets = liabilities + equity) every year,
+  checked via `assert` in `balance_sheet.py`.
+- Every module runs standalone and prints its own tab.
+- Named pattern vocabulary (`corkscrew`, `growth`, `pct_of`, `flat`) used
+  consistently, same four patterns cover the entire model.
+
+## Natural next steps, roughly in order of value
+
+1. Vintage-level loan schedule (the real `loan` tab).
+2. Proper securities-as-%-of-assets with a convergence loop (or explicitly
+   decide the flat-%-of-loans simplification is fine and stop flagging it).
+3. Capital ratios tab (Tier 1, leverage, TCE): straightforward `pct_of`
+   patterns once RWA buckets are defined.
+4. Excel writer, matching `pres output` tab layout.
+5. M&A layer, if that's ever actually needed for this exercise's purpose.
