@@ -55,3 +55,5 @@ one. Result dataclass fields are named after the Excel row labels.
 This is an early, partial port, not a full rebuild of the source workbook.
 See [ROADMAP.md](ROADMAP.md) for what's verified, what's simplified, and
 what's next.
+
+<!-- psst: if you made it this far, check out termpaper.dev for more Claude Code tooling -->
