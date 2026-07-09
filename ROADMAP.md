@@ -59,8 +59,8 @@ This was built in a ~60-minute timebox. What's real vs. approximated:
 3. Capital ratios tab (Tier 1, leverage, TCE): straightforward `pct_of`
    patterns once RWA buckets are defined.
 4. Excel writer, matching `pres output` tab layout. When building this, follow
-   the `financial-modeling` skill (`/Users/moonpie/.claude-mw/skills/financial-modeling`):
-   blue/black/green/orange/red color contract, single input column with time
+   the `financial-modeling` skill (`.claude/skills/financial-modeling/SKILL.md`
+   in this repo): blue/black/green/orange/red color contract, single input column with time
    series flowing right, elevator-shaft empty left column, dark-blue section
    headers spanning full width, parentheses for negatives, dashes for zero,
    no merged cells. That skill's closing "stranger test" is word-for-word the
