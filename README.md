@@ -92,5 +92,16 @@ This was built in a ~60-minute timebox. What's real vs. approximated:
    decide the flat-%-of-loans simplification is fine and stop flagging it).
 3. Capital ratios tab (Tier 1, leverage, TCE): straightforward `pct_of`
    patterns once RWA buckets are defined.
-4. Excel writer, matching `pres output` tab layout.
+4. Excel writer, matching `pres output` tab layout. When building this, follow
+   the `financial-modeling` skill (`/Users/moonpie/.claude-mw/skills/financial-modeling`):
+   blue/black/green/orange/red color contract, single input column with time
+   series flowing right, elevator-shaft empty left column, dark-blue section
+   headers spanning full width, parentheses for negatives, dashes for zero,
+   no merged cells. That skill's closing "stranger test" is word-for-word the
+   same four questions as Appendix B of `MODELING_PATTERNS.md`, so the two
+   standards are already aligned, this one just covers the Excel-side detail
+   the other doesn't. It's also the natural argument for revisiting
+   simplification #6 (YAML vs. Excel inputs): a proper single input column
+   with the value and its rationale side by side is exactly the property an
+   Excel input workbook gets you that YAML comments don't.
 5. M&A layer, if that's ever actually needed for this exercise's purpose.
